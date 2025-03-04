@@ -1,37 +1,37 @@
-import os
 import requests
 from dotenv import load_dotenv
+
+from config import (
+    CLIENT_ID, 
+    CLIENT_SECRET, 
+    REFRESH_TOKEN,  # CHANGED: Using refresh token instead of auth code
+    AMAZON_REDIRECT_URI,  # Using variable from config
+    TOKEN_URL,  # Already set from config
+    CAMPAIGNS_ENDPOINT,
+    PROFILES_ENDPOINT,
+)
+
 
 # Load environment variables from your .env file
 load_dotenv()
 
-# Retrieve your credentials and authorization details from the .env file
-CLIENT_ID = os.getenv("AMAZON_CLIENT_ID")
-CLIENT_SECRET = os.getenv("AMAZON_CLIENT_SECRET")
-AUTH_CODE = os.getenv("AUTH_CODE")        # The authorization code from user consent
-REDIRECT_URI = "https://amazon.com"    # Must match the one registered with Amazon
-
-# Amazon OAuth token endpoint (verify with the latest documentation)
-TOKEN_URL = "https://api.amazon.co.uk/auth/o2/token"
-# Amazon Advertising API endpoint for campaigns (adjust region/version as needed)
-CAMPAIGNS_ENDPOINT = "https://advertising-api.amazon.com/v2/campaigns"
-
-PROFILES_ENDPOINT = "https://advertising-api-eu.amazon.com/v2/profiles"
-
 def get_access_token():
-    """Exchange the authorization code for an access token."""
+    """
+    Exchange your refresh token for a new access token.
+    CHANGED: Using 'refresh_token' grant instead of 'authorization_code'
+    """
     payload = {
-        "grant_type": "authorization_code",
-        "code": AUTH_CODE,
+        "grant_type": "refresh_token", 
+        "refresh_token": REFRESH_TOKEN, 
         "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "redirect_uri": REDIRECT_URI,
+        "client_secret": CLIENT_SECRET
     }
     response = requests.post(TOKEN_URL, data=payload)
     if response.status_code == 200:
         data = response.json()
         access_token = data.get("access_token")
-        print("Access Token obtained successfully.")
+        print("Access Token obtained successfully:")
+        print(access_token)
         return access_token
     else:
         print("Error obtaining token:", response.status_code, response.text)
@@ -55,12 +55,27 @@ def get_profiles(token):
         print("Error fetching profiles:", response.status_code, response.text)
         return None
 
+def get_uk_profile_id(profiles):
+    """
+    CHANGED: Filter profiles for the UK.
+    Assuming that the UK profile has a 'countryCode' field set to 'GB'.
+    Adjust the filter if your profiles use a different identifier.
+    """
+    for profile in profiles:
+        # Check if the profile has a countryCode field and if it's 'GB' (United Kingdom)
+        if profile.get("countryCode") == "UK":
+            return str(profile.get("profileId"))
+    print("UK profile not found.")
+    return None
 
-def fetch_campaigns(access_token):
-    """Fetch the PPC campaign data using the access token."""
+
+def fetch_campaigns(access_token, profile_id):
+    """Fetch the PPC campaign data using the access token and profile ID."""
+    # CHANGED: Added Amazon-Advertising-API-Scope header with the profile_id.
     headers = {
+        "Amazon-Advertising-API-ClientId": CLIENT_ID,
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
+        "Amazon-Advertising-API-Scope": profile_id  # Required header for campaigns endpoint
     }
     response = requests.get(CAMPAIGNS_ENDPOINT, headers=headers)
     if response.status_code == 200:
@@ -69,11 +84,13 @@ def fetch_campaigns(access_token):
         print("Error fetching campaigns:", response.status_code, response.text)
         return None
 
+
 if __name__ == "__main__":
     token = get_access_token()
     if token:
         profiles = get_profiles(token)
-        campaigns = fetch_campaigns(token)
+        uk_profile_id = get_uk_profile_id(profiles)
+        campaigns = fetch_campaigns(token, uk_profile_id)
         if campaigns:
             print("Campaign Data:")
             print(campaigns)
