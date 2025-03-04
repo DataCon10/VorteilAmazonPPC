@@ -1,6 +1,13 @@
 import pytest
 import requests
+import sys
+import os
+# Insert the project root (one level up) into sys.path before other imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from scripts.fetch_data import get_access_token, get_profiles, get_uk_profile_id, fetch_campaigns
+
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # TEST NOTE: DummyResponse is a helper class to mimic the Response object from requests.
 class DummyResponse:
@@ -31,7 +38,7 @@ def test_get_access_token_failure(monkeypatch):
 
 # Test for get_profiles() when successful
 def test_get_profiles_success(monkeypatch):
-    dummy_profiles = [{"profileId": "123", "countryCode": "GB"}]
+    dummy_profiles = [{"profileId": "123", "countryCode": "UK"}]
     def dummy_get(url, headers):
         return DummyResponse(dummy_profiles, 200)
     monkeypatch.setattr(requests, "get", dummy_get)
@@ -41,7 +48,7 @@ def test_get_profiles_success(monkeypatch):
 # Test for get_uk_profile_id() when UK profile is found
 def test_get_uk_profile_id_found():
     profiles = [
-        {"profileId": "123", "countryCode": "GB"},
+        {"profileId": "123", "countryCode": "UK"},
         {"profileId": "456", "countryCode": "US"}
     ]
     uk_profile = get_uk_profile_id(profiles)
