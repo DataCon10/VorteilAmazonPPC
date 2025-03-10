@@ -10,6 +10,7 @@ from config import (
     CAMPAIGNS_ENDPOINT,
     PROFILES_ENDPOINT,
 )
+from typing import List, Dict
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
@@ -26,7 +27,7 @@ class AmazonAdsClient:
         self.campaigns_endpoint = CAMPAIGNS_ENDPOINT
         self.profiles_endpoint = PROFILES_ENDPOINT
         self.token = None
-
+        self.headers = None
 
     def get_access_token(self) -> str:
         """
