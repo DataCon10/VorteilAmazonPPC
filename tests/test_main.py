@@ -5,11 +5,30 @@ import os
 # Insert the project root (one level up) into sys.path before other imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import sys
-import os
-import pytest
-import requests
+
 from scripts.fetch_data import AmazonAdsClient
+
+
+def test_amazon_ads_client_setup(monkeypatch):
+    # Set environment variables for testing purposes
+    monkeypatch.setenv("AMAZON_CLIENT_ID", "test_client_id")
+    monkeypatch.setenv("AMAZON_CLIENT_SECRET", "test_client_secret")
+    monkeypatch.setenv("AMAZON_REFRESH_TOKEN", "test_refresh_token")
+    monkeypatch.setenv("AMAZON_REDIRECT_URI", "http://localhost:5000/callback")
+    monkeypatch.setenv("MARKETPLACE", "EU")
+    
+    # Instantiate the AmazonAdsClient class.
+    client = AmazonAdsClient()
+    
+    # Assert that instance variables are set correctly.
+    assert client.client_id == "test_client_id"
+    assert client.client_secret == "test_client_secret"
+    assert client.refresh_token == "test_refresh_token"
+    assert client.redirect_uri == "http://localhost:5000/callback"
+    # Depending on your config, you can also check endpoints:
+    # For example, if MARKETPLACE is EU, the TOKEN_URL should be set accordingly:
+    assert "amazon.com" in client.token_url or "amazon.co.uk" in client.token_url
+
 
 # DummyResponse is a helper class to mimic the Response object from requests.
 class DummyResponse:
