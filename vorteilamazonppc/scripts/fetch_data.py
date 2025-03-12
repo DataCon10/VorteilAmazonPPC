@@ -1,7 +1,7 @@
 import logging
 import requests
 from dotenv import load_dotenv
-from config import (
+from vorteilamazonppc.config import (
     CLIENT_ID, 
     CLIENT_SECRET, 
     REFRESH_TOKEN,  
