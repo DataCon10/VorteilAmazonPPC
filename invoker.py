@@ -1,9 +1,12 @@
 from scripts import fetch_data, peel
 import logging
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
 
 def main():
+
+    load_dotenv()
 
     # Create an instance of the client.
     client = fetch_data.AmazonAdsClient()

@@ -1,6 +1,5 @@
 import logging
 import requests
-from dotenv import load_dotenv
 from vorteilamazonppc.config import (
     CLIENT_ID, 
     CLIENT_SECRET, 
@@ -13,7 +12,7 @@ from vorteilamazonppc.config import (
 from typing import List, Dict
 
 logging.basicConfig(level=logging.INFO)
-load_dotenv()
+
 
 
 class AmazonAdsClient:

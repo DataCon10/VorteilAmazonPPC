@@ -1,9 +1,5 @@
 # config.py
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from your .env file
-load_dotenv()
 
 # Set the target marketplace via an environment variable (default is EU)
 MARKETPLACE = os.getenv("MARKETPLACE", "UK")  # Options: "US", "EU", "UK"
